@@ -258,10 +258,15 @@ An **Internet Gateway (IGW)** allows communication between instances in a VPC an
 - Is horizontally scaled, redundant, and highly available.
 - Can only be attached to a single VPC at a time.
 
+![This is an example Internet Gateway image](Notes/images/igw.png)
+
+
 ## NAT Gateway
 A **Network Address Translation (NAT) Gateway** enables instances in private subnets to initiate outbound IPv4 traffic to the internet while preventing unsolicited inbound traffic. This is useful for:
 - Downloading software updates
 - Accessing external APIs securely without exposing instances to direct internet access
+
+![This is an example NAT Gateway image](Notes/images/nat.png)
 
 ## Route Tables
 **Route tables** contain a set of rules, called **routes**, that determine where network traffic is directed. Key points:
