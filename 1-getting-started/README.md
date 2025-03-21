@@ -60,7 +60,6 @@ $ aws configure --profile sriram
     Default output format [None]: table
 
 # These aws configure commands creates the following files:
-```shell
 $ ls -l ~/.aws/
 total 16
 -rw-------  1 sriramponangi  staff   95 15 Mar 15:36 config
