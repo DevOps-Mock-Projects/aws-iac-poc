@@ -289,7 +289,7 @@ A **Network ACL (NACL)** is a **stateless firewall** that controls traffic in an
   | Rule # | Type       | Protocol | Port Range | Source         | Allow/Deny | Description                          |
   |--------|------------|----------|------------|----------------|------------|--------------------------------------|
   | 100    | All Traffic| All      | All        | 0.0.0.0/0      | ALLOW      | Allows all inbound traffic from any source. |
-  | *      | All Traffic| All      | All        | 0.0.0.0/0      | ALLOW      | Allows all other inbound traffic by default. |
+  | *      | All Traffic| All      | All        | 0.0.0.0/0      | DENY       | Denies all other inbound traffic by default. |
 
 
   > Default Outbound Rules Table
@@ -297,7 +297,7 @@ A **Network ACL (NACL)** is a **stateless firewall** that controls traffic in an
   | Rule # | Type       | Protocol | Port Range | Destination     | Allow/Deny | Description                          |
   |--------|------------|----------|------------|-----------------|------------|--------------------------------------|
   | 100    | All Traffic| All      | All        | 0.0.0.0/0       | ALLOW      | Allows all outbound traffic to any destination. |
-  | *      | All Traffic| All      | All        | 0.0.0.0/0       | ALLOW      | Allows all other outbound traffic by default. |
+  | *      | All Traffic| All      | All        | 0.0.0.0/0       | DENY       | Denies all other outbound traffic by default. |
 
 
 - Example of a custom inbound and outbound NACL Tables:
