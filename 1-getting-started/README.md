@@ -211,13 +211,12 @@ module "subnets" {
 | **Operator**  | **Example**         | **Allowed Versions** | **Not Allowed** | **Behavior** |
 |--------------|-------------------|----------------------|-----------------|--------------|
 | `=`          | `= 4.16.0`        | **Only** `4.16.0`   | `4.16.1`, `4.17.0`, `5.0.0` | Locks to an exact version. No upgrades allowed. |
-| `!=`         | `!= 4.16.0`       | **Anything except** `4.16.0` | `4.16.0` | Excludes a specific version. |
-| `>`          | `> 4.16.0`        | `4.16.1`, `4.17.0`, `5.0.0` | `4.16.0` and below | Allows only versions greater than the specified one. |
+| `>`          | `> 4.16.0`        | `4.16.1`, `4.17.0`, `5.0.0`, etc. | `4.16.0` and below | Allows only versions greater than the specified one. |
 | `<`          | `< 4.16.0`        | `4.15.9`, `4.15.8`, etc. | `4.16.0` and above | Allows only versions lower than the specified one. |
 | `>=`         | `>= 4.16.0`       | `4.16.0`, `4.16.1`, `4.17.0`, `5.0.0` | `4.15.x` and below | Allows any version equal to or greater than the specified one. |
 | `<=`         | `<= 4.16.0`       | `4.16.0`, `4.15.9`, `3.x.x` | `4.16.1` and above | Allows any version equal to or lower than the specified one. |
-| `~>`         | `~> 4.16.2`       | `4.16.2`, `4.16.3`, `4.16.99` | `4.17.0+`, `5.0.0` | Allows **only patch updates**, but prevents minor and major upgrades. |
-| `>= , <`     | `>= 4.16, < 5.0.0` | Same as `~> 4.16` | Same as `~> 4.16` | Equivalent to `~> 4.16`, allows upgrades within `4.x` but **blocks `5.0.0+`**. |
+| `~>` **(Recommended)**         | `~> 4.16.2`       | `4.16.2`, `4.16.3`, `4.16.99` | `4.17.0+`, `5.0.0` | Allows **only patch updates**, but prevents minor and major upgrades. |
+| `>= , <`     | `>= 4.16.2, < 5.0.0` | Same as `~> 4.16.2` | Same as `~> 4.16.2` | Equivalent to `~> 4.16`, allows upgrades within `4.16.x` but **blocks `5.0.0+`**. |
 
 
 
@@ -232,7 +231,7 @@ module "subnets" {
 ---
 # AWS Networking Overview:
 
-Overview of key AWS networking components.
+Overview of key AWS networking components used in the terraform example in this repo.
 
 ## Virtual Private Cloud (VPC)
 A **VPC (Virtual Private Cloud)** is an isolated virtual network within the AWS cloud where you can launch and manage AWS resources. It provides complete control over network configuration, including:
@@ -249,36 +248,97 @@ Within a VPC, subnets are created to segment the network. They can be classified
 - **Private Subnets**: Resources here are isolated from direct internet access, preventing unsolicited inbound traffic and enhancing security.
 
 
-![This is an example VPC image](Notes/images/vpc.png)
-> **NOTE:** By default resources in one VPC cannot access resources in another VPC, but it can be enabled using NAT Gateways.
+  ![This is an example VPC image](Notes/images/vpc.png)
+
+> [!NOTE]  
+> By default resources in one VPC cannot access resources in another VPC, but it can be enabled using NAT Gateways.
 
 ## Internet Gateway (IGW)
 An **Internet Gateway (IGW)** allows communication between instances in a VPC and the internet. It:
 - Enables public-facing resources to send and receive traffic from the internet.
 - Is horizontally scaled, redundant, and highly available.
-- Can only be attached to a single VPC at a time.
+- Only a single IGW can be attached to a VPC at a time.
 
-![This is an example Internet Gateway image](Notes/images/igw.png)
+  ![This is an example Internet Gateway image](Notes/images/igw.png)
 
 
 ## NAT Gateway
-A **Network Address Translation (NAT) Gateway** enables instances in private subnets to initiate outbound IPv4 traffic to the internet while preventing unsolicited inbound traffic. This is useful for:
+A **Network Address Translation (NAT) Gateway** enables instances in private subnets to initiate **outbound** IPv4 traffic to the internet while preventing unsolicited inbound traffic. This is useful for:
 - Downloading software updates
 - Accessing external APIs securely without exposing instances to direct internet access
 
-![This is an example NAT Gateway image](Notes/images/nat.png)
+  ![This is an example NAT Gateway image](Notes/images/nat.png)
 
 ## Route Tables
-**Route tables** contain a set of rules, called **routes**, that determine where network traffic is directed. Key points:
-- Each subnet must be associated with a route table.
-- Route tables control traffic routing for a subnet.
-- Example: A public subnet route table directs internet-bound traffic to an IGW.
+**Route tables** contain a set of rules, called **routes**, that determine where network traffic is directed within a VPC. Key points:
+- It operates at the subnet level, where each subnet is associated with a single route table, but a route table can be shared across multiple subnets.
+- Route tables manage the routing of traffic for a subnet, determining where outbound and inbound traffic is directed (e.g., to an Internet Gateway, NAT Gateway, or a local destination).
+- Example: A public subnet's route table directs internet-bound traffic to an Internet Gateway, while a private subnet's route table routes outbound internet traffic through a NAT Gateway.
+
+  ![This is an example NAT Gateway image](Notes/images/rt.png)
 
 ## Network Access Control Lists (NACLs)
-A **Network ACL (NACL)** is a firewall that controls traffic in and out of one or more subnets. It:
-- Provides an additional layer of security at the subnet level.
-- Contains a numbered list of rules evaluated in order.
-- Can allow or deny traffic based on IP ranges and protocols.
+A **Network ACL (NACL)** is a **stateless firewall** that controls traffic in and out of one or more subnets.
+- The N-ACL firewall rules provides an additional layer of security at the subnet level.
+- It contains a numbered list of rules evaluated in order from top to bottom.
+- It can allow or deny traffic based on IP ranges, port ranges and protocols.
+
+- Example of default inbound and outbound NACL Tables:
+
+  > Default Inbound Rules Table
+
+  | Rule # | Type       | Protocol | Port Range | Source         | Allow/Deny | Description                          |
+  |--------|------------|----------|------------|----------------|------------|--------------------------------------|
+  | 100    | All Traffic| All      | All        | 0.0.0.0/0      | ALLOW      | Allows all inbound traffic from any source. |
+  | *      | All Traffic| All      | All        | 0.0.0.0/0      | ALLOW      | Allows all other inbound traffic by default. |
+
+
+  > Default Outbound Rules Table
+
+  | Rule # | Type       | Protocol | Port Range | Destination     | Allow/Deny | Description                          |
+  |--------|------------|----------|------------|-----------------|------------|--------------------------------------|
+  | 100    | All Traffic| All      | All        | 0.0.0.0/0       | ALLOW      | Allows all outbound traffic to any destination. |
+  | *      | All Traffic| All      | All        | 0.0.0.0/0       | ALLOW      | Allows all other outbound traffic by default. |
+
+
+- Example of a custom inbound and outbound NACL Tables:
+
+  > Inbound Rules Table
+
+  | Rule # | Type       | Protocol | Port Range | Source         | Allow/Deny | Description                          |
+  |--------|------------|----------|------------|----------------|------------|--------------------------------------|
+  | 100    | HTTP       | TCP      | 80         | 0.0.0.0/0      | ALLOW      | Allows inbound HTTP traffic from any IPv4 address. |
+  | 110    | HTTPS      | TCP      | 443        | 0.0.0.0/0      | ALLOW      | Allows inbound HTTPS traffic from any IPv4 address. |
+  | 120    | SSH        | TCP      | 22         | 192.168.1.0/24 | ALLOW      | Allows inbound SSH traffic from a specific subnet. |
+  | *      | All Traffic| All      | All        | 0.0.0.0/0      | DENY       | Denies all other inbound traffic.    |
+
+  > Outbound Rules Table
+
+  | Rule # | Type       | Protocol | Port Range | Destination     | Allow/Deny | Description                          |
+  |--------|------------|----------|------------|-----------------|------------|--------------------------------------|
+  | 100    | HTTP       | TCP      | 80         | 0.0.0.0/0       | ALLOW      | Allows outbound HTTP traffic to any IPv4 address. |
+  | 110    | HTTPS      | TCP      | 443        | 0.0.0.0/0       | ALLOW      | Allows outbound HTTPS traffic to any IPv4 address. |
+  | 120    | Custom TCP | TCP      | 32768-65535| 0.0.0.0/0       | ALLOW      | Allows outbound ephemeral port traffic for responses. |
+  | *      | All Traffic| All      | All        | 0.0.0.0/0       | DENY       | Denies all other outbound traffic.   |
+
+
+- Explanation of Columns in the NACL tables:
+  - **Rule #**: The order in which rules are evaluated. Lower numbers are evaluated first.
+  - **Type**: The type of traffic (e.g., HTTP, HTTPS, SSH).
+  - **Protocol**: The protocol used (e.g., TCP, UDP, or All).
+  - **Port Range**: The range of ports the rule applies to (e.g., 80 for HTTP).
+  - **Source/Destination**: The IP address or CIDR block from which traffic originates (inbound) or to which it is sent (outbound).
+  - **Allow/Deny**: Specifies whether the traffic is allowed or denied.
+  - **Description**: A brief explanation of the rule's purpose.
+
+
+
+> [!NOTE]
+> When we say that a Network Access Control List (NACL) in AWS is "stateless," it means that it does not maintain any memory of past network traffic. In other words, each packet of data that passes through the NACL is evaluated against its inbound or outbound rules as if it is a completely independent event, with no awareness of prior packets. 
+> Therefore "stateless" implies:
+> - **Explicit Rules for Both Directions**: You need to create separate rules for inbound and outbound traffic. For example, if you allow inbound traffic on port 80 (HTTP), you must also explicitly allow outbound traffic on port 80 for the response to be sent.
+> - **No Automatic Associations**: Unlike a stateful firewall (e.g., AWS Security Groups), NACLs don't automatically associate a response with the corresponding request.
+
 
 ## Security Groups
 **Security Groups** are virtual firewalls that control inbound and outbound traffic for AWS resources such as EC2 instances. Key points:
