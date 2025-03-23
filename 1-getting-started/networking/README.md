@@ -27,16 +27,14 @@ Within a VPC, subnets are created to segment the network. They can be classified
 
 > [!TIP] 
 > ### RFC 1918 Private IPv4 Address Recommendations:
-> - RFC 1918 defines the ranges of IPv4 addresses reserved for private > networks, meaning these addresses are not routable on the public internet and > are recommended for use within internal/private networks, like home or office > networks / AWS-VPCs. 
-> 
+> - RFC 1918 defines the ranges of IPv4 addresses reserved for private > networks, meaning these addresses are not routable on the > public internet and > are recommended for use within internal/private networks, like home or office > networks / AWS-VPCs. 
 > - RFC 1918 defines three private IP address CIDR ranges:
 > 
->   | Address Range                | CIDR Notation | Number of IPs  | Best Use > Case          |
->   |------------------------------|--------------|---------------|> ------------------------|
->   | 10.0.0.0 – 10.255.255.255    | **10.0.0.0/8**       | **16M+**      | > Large Enterprises      |
->   | 172.16.0.0 – 172.31.255.255  | **172.16.0.0/12**      | **1M+**       | > Medium-sized Networks  |
->   | 192.168.0.0 – 192.168.255.255| **192.168.0.0/16**      | **65K+**      | > Home & Small Offices   |
-> 
+> | Address Range                | CIDR Notation | Number of IPs  | Best Use > Case          |
+> |------------------------------|--------------|---------------| ------------------------|
+> | 10.0.0.0 – 10.255.255.255    | **10.0.0.0/8**       | **16M+**      | > Large Enterprises      |
+> | 172.16.0.0 – 172.31.255.255  | **172.16.0.0/12**      | **1M+**       | > Medium-sized Networks  |
+> | 192.168.0.0 – 192.168.255.255| **192.168.0.0/16**      | **65K+**      | > Home & Small Offices   |
 > 
 > #### **Key Recommendations & Rules**  
 > - **Use private IPs for internal networks** (home, office, enterprise > networks)  
