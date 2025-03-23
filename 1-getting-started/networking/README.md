@@ -1,0 +1,178 @@
+
+# AWS Networking Overview:
+This section provides overview of key AWS networking components.
+
+
+
+
+
+## Virtual Private Cloud (VPC)
+A **VPC (Virtual Private Cloud)** is an isolated virtual network within the AWS cloud where you can launch and manage AWS resources. It provides complete control over network configuration, including:
+- IP address ranges
+- Subnets
+- Route tables
+- Gateways
+
+By default, AWS provides a pre-configured VPC with internet access, but you can also create custom VPCs tailored to your specific requirements.
+
+## Subnets
+Within a VPC, subnets are created to segment the network. They can be classified as:
+- **Public Subnets**: Resources in these subnets can directly communicate with the internet, typically through an Internet Gateway (IGW).
+- **Private Subnets**: Resources here are isolated from direct internet access, preventing unsolicited inbound traffic and enhancing security.
+
+> [!NOTE]  
+> By default resources in one VPC cannot access resources in another VPC, but it can be enabled using NAT Gateways.
+
+![This is an example VPC image](diagrams/vpc.png)
+
+> [!INFO] 
+> ### RFC 1918 Private IPv4 Address Recommendations:
+> - RFC 1918 defines the ranges of IPv4 addresses reserved for private > networks, meaning these addresses are not routable on the public internet and > are recommended for use within internal/private networks, like home or office > networks / AWS-VPCs. 
+> 
+> - RFC 1918 defines three private IP address CIDR ranges:
+> 
+>   | Address Range                | CIDR Notation | Number of IPs  | Best Use > Case          |
+>   |------------------------------|--------------|---------------|> ------------------------|
+>   | 10.0.0.0 – 10.255.255.255    | **10.0.0.0/8**       | **16M+**      | > Large Enterprises      |
+>   | 172.16.0.0 – 172.31.255.255  | **172.16.0.0/12**      | **1M+**       | > Medium-sized Networks  |
+>   | 192.168.0.0 – 192.168.255.255| **192.168.0.0/16**      | **65K+**      | > Home & Small Offices   |
+> 
+> 
+> #### **Key Recommendations & Rules**  
+> - **Use private IPs for internal networks** (home, office, enterprise > networks)  
+> - **Do not use these IPs on the public internet** (ISPs block them)  
+> - **NAT (Network Address Translation) is needed** to connect private networks > to the internet  
+> - **These addresses can be reused** by different organizations without > conflicts  
+> - **Private IPs help conserve IPv4 space**, reducing the need for public IPs
+
+
+
+
+> [!INFO] 
+> ### CIDR Basic Overview:
+> CIDR, or Classless Inter-Domain Routing, is a method used to allocate IP > addresses and route Internet Protocol (IP) packets more efficiently. 
+> 
+> CIDR Notation Explanation:
+> - Suppose we have the CIDR notation: 192.168.1.0/24.
+> - Range of IPs available: 192.168.1.0 - 192.168.1.255 (Total Count: 256)
+> - /24 indicates that the first 24 bits out of 32 bits in the IPV4 address are > fixed for the network prefix, and only the 8 bits are available for our > custom host addresses.
+> - Decimal and binary representation of the IPV4:
+>   ```
+>   IP Address (Decimal): 192.168.1.0
+>   IP Address (Binary): 11000000.10101000.00000001.00000000
+>   ```
+>   - The first 24 bits (11000000.10101000.00000001) are the fixed bits of > network prefix.
+>   - The last 8 bits (00000000) are for the host portion, which can be > modified to create various IPV4 addresses under the 192.168.1.0/24 CIDR > notation.
+
+
+
+
+
+## Internet Gateway (IGW)
+An **Internet Gateway (IGW)** allows communication between instances in a VPC and the internet. It:
+- Enables public-facing resources to send and receive traffic from the internet.
+- Is horizontally scaled, redundant, and highly available.
+- Only a single IGW can be attached to a VPC at a time.
+
+  ![This is an example Internet Gateway image](diagrams/igw.png)
+
+
+## NAT Gateway
+A **Network Address Translation (NAT) Gateway** enables instances in private subnets to initiate **outbound** IPv4 traffic to the internet while preventing unsolicited inbound traffic. This is useful for:
+- Downloading software updates
+- Accessing external APIs securely without exposing instances to direct internet access
+
+  ![This is an example NAT Gateway image](diagrams/nat.png)
+
+## Route Tables
+**Route tables** contain a set of rules, called **routes**, that determine where network traffic is directed within a VPC. Key points:
+- It operates at the subnet level, where each subnet is associated with a single route table, but a route table can be shared across multiple subnets.
+- Route tables manage the routing of traffic for a subnet, determining where outbound and inbound traffic is directed (e.g., to an Internet Gateway, NAT Gateway, or a local destination).
+- Example: A public subnet's route table directs internet-bound traffic to an Internet Gateway, while a private subnet's route table routes outbound internet traffic through a NAT Gateway.
+
+  ![This is an example NAT Gateway image](diagrams/rt.png)
+
+## Network Access Control Lists (NACLs)
+A **Network ACL (NACL)** is a **stateless firewall** that controls traffic in and out of one or more subnets.
+- The N-ACL firewall rules provides an additional layer of security at the subnet level.
+- It contains a numbered list of rules evaluated in order from top to bottom.
+- It can allow or deny traffic based on IP ranges, port ranges and protocols.
+
+- Example of default inbound and outbound NACL Tables:
+
+  > Default Inbound Rules Table
+
+  | Rule # | Type       | Protocol | Port Range | Source         | Allow/Deny | Description                          |
+  |--------|------------|----------|------------|----------------|------------|--------------------------------------|
+  | 100    | All Traffic| All      | All        | 0.0.0.0/0      | ALLOW      | Allows all inbound traffic from any source. |
+  | *      | All Traffic| All      | All        | 0.0.0.0/0      | DENY       | Denies all other inbound traffic by default. |
+
+
+  > Default Outbound Rules Table
+
+  | Rule # | Type       | Protocol | Port Range | Destination     | Allow/Deny | Description                          |
+  |--------|------------|----------|------------|-----------------|------------|--------------------------------------|
+  | 100    | All Traffic| All      | All        | 0.0.0.0/0       | ALLOW      | Allows all outbound traffic to any destination. |
+  | *      | All Traffic| All      | All        | 0.0.0.0/0       | DENY       | Denies all other outbound traffic by default. |
+
+
+- Example of a custom inbound and outbound NACL Tables:
+
+  > Inbound Rules Table
+
+  | Rule # | Type       | Protocol | Port Range | Source         | Allow/Deny | Description                          |
+  |--------|------------|----------|------------|----------------|------------|--------------------------------------|
+  | 100    | HTTP       | TCP      | 80         | 0.0.0.0/0      | ALLOW      | Allows inbound HTTP traffic from any IPv4 address. |
+  | 110    | HTTPS      | TCP      | 443        | 0.0.0.0/0      | ALLOW      | Allows inbound HTTPS traffic from any IPv4 address. |
+  | 120    | SSH        | TCP      | 22         | 192.168.1.0/24 | ALLOW      | Allows inbound SSH traffic from a specific subnet. |
+  | *      | All Traffic| All      | All        | 0.0.0.0/0      | DENY       | Denies all other inbound traffic.    |
+
+  > Outbound Rules Table
+
+  | Rule # | Type       | Protocol | Port Range | Destination     | Allow/Deny | Description                          |
+  |--------|------------|----------|------------|-----------------|------------|--------------------------------------|
+  | 100    | HTTP       | TCP      | 80         | 0.0.0.0/0       | ALLOW      | Allows outbound HTTP traffic to any IPv4 address. |
+  | 110    | HTTPS      | TCP      | 443        | 0.0.0.0/0       | ALLOW      | Allows outbound HTTPS traffic to any IPv4 address. |
+  | 120    | Custom TCP | TCP      | 32768-65535| 0.0.0.0/0       | ALLOW      | Allows outbound ephemeral port traffic for responses. |
+  | *      | All Traffic| All      | All        | 0.0.0.0/0       | DENY       | Denies all other outbound traffic.   |
+
+
+- Explanation of Columns in the NACL tables:
+  - **Rule #**: The order in which rules are evaluated. Lower numbers are evaluated first.
+  - **Type**: The type of traffic (e.g., HTTP, HTTPS, SSH).
+  - **Protocol**: The protocol used (e.g., TCP, UDP, or All).
+  - **Port Range**: The range of ports the rule applies to (e.g., 80 for HTTP).
+  - **Source/Destination**: The IP address or CIDR block from which traffic originates (inbound) or to which it is sent (outbound).
+  - **Allow/Deny**: Specifies whether the traffic is allowed or denied.
+  - **Description**: A brief explanation of the rule's purpose.
+
+
+
+> [!NOTE]
+> When we say that a Network Access Control List (NACL) in AWS is "stateless," it means that it does not maintain any memory of past network traffic. In other words, each packet of data that passes through the NACL is evaluated against its inbound or outbound rules as if it is a completely independent event, with no awareness of prior packets. 
+> Therefore "stateless" implies:
+> - **Explicit Rules for Both Directions**: You need to create separate rules for inbound and outbound traffic. For example, if you allow inbound traffic on port 80 (HTTP), you must also explicitly allow outbound traffic on port 80 for the response to be sent.
+> - **No Automatic Associations**: Unlike a stateful firewall (e.g., AWS Security Groups), NACLs don't automatically associate a response with the corresponding request.
+
+
+## Security Groups
+**Security Groups** are virtual firewalls that control inbound and outbound traffic for AWS resources such as **EC2 instances**. Key points:
+- It operates at the instance level unlike the NACL which operates at the subnet level.
+- Specify allowed protocols, ports, and source/destination IP ranges.
+
+
+
+## VPC Endpoints
+**VPC Endpoints** enable private connections between a VPC and supported AWS services without requiring:
+- An Internet Gateway (IGW)
+- A NAT device
+- A VPN connection
+- AWS Direct Connect
+
+Traffic between the VPC and AWS services remains within the AWS network, improving security and reducing latency.
+
+---
+
+### Conclusion
+Understanding and configuring these components effectively allows for designing robust, secure, and efficient network architectures within AWS.
+

@@ -1,3 +1,4 @@
+# Creating a VPC
 resource "aws_vpc" "poc_vpc" {
   cidr_block           = "10.1.0.0/16"
   instance_tenancy     = "default"
@@ -8,6 +9,7 @@ resource "aws_vpc" "poc_vpc" {
   }
 }
 
+# Creating the 
 resource "aws_subnet" "subnet_1" {
   vpc_id                  = aws_vpc.poc_vpc.id
   cidr_block              = "10.1.1.0/24"
