@@ -59,8 +59,8 @@ Within a VPC, subnets are created to segment the network. They can be classified
 >   IP Address (Decimal): 192.168.1.0
 >   IP Address (Binary): 11000000.10101000.00000001.00000000
 >   ```
->   - The first 24 bits (11000000.10101000.00000001) are the fixed bits of > network prefix.
->   - The last 8 bits (00000000) are for the host portion, which can be > modified to create various IPV4 addresses under the 192.168.1.0/24 CIDR > notation.
+>   - The first 24 bits (`11000000.10101000.00000001`) are the fixed bits of > network prefix.
+>   - The last 8 bits (`00000000`) are for the host portion, which can be > modified to create various IPV4 addresses under the 192.168.1.0/24 CIDR > notation.
 
 
 
