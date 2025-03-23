@@ -25,7 +25,7 @@ Within a VPC, subnets are created to segment the network. They can be classified
 
 ![This is an example VPC image](diagrams/vpc.png)
 
-> [!INFO] 
+> [!TIP] 
 > ### RFC 1918 Private IPv4 Address Recommendations:
 > - RFC 1918 defines the ranges of IPv4 addresses reserved for private > networks, meaning these addresses are not routable on the public internet and > are recommended for use within internal/private networks, like home or office > networks / AWS-VPCs. 
 > 
@@ -48,7 +48,7 @@ Within a VPC, subnets are created to segment the network. They can be classified
 
 
 
-> [!INFO] 
+> [!TIP] 
 > ### CIDR Basic Overview:
 > CIDR, or Classless Inter-Domain Routing, is a method used to allocate IP > addresses and route Internet Protocol (IP) packets more efficiently. 
 > 
