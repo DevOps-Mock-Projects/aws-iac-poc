@@ -156,21 +156,30 @@ A **Network ACL (NACL)** is a **stateless firewall** that controls traffic in an
 ## Security Groups
 **Security Groups** are virtual firewalls that control inbound and outbound traffic for AWS resources such as **EC2 instances**. Key points:
 - It operates at the instance level unlike the NACL which operates at the subnet level.
-- Specify allowed protocols, ports, and source/destination IP ranges.
+- By default, all outbound traffic from your instance is allowed and all inbound traffic to your instance is denied. When you create an EC2 instance or after you launch it, you can modify the inbound rules to allow certain types of traffic from certain IP addresses at certain ports.
+- Stateful: They automatically allow return/response traffic for connections allowed by inbound rules, even if there is no explicit outbound rule configured to allow it.
+- To add a security group rule, you must specify:
+  - The **protocol** to allow
+  - The **range of ports** to allow
+  - The **traffic source** to allow for inbound rules, or the **traffic destination** to allow for outbound rules
+  - An optional **description**
+![This is an example Security Group config image](diagrams/sg.png)
 
 
 
 ## VPC Endpoints
-**VPC Endpoints** enable private connections between a VPC and supported AWS services without requiring:
-- An Internet Gateway (IGW)
-- A NAT device
-- A VPN connection
-- AWS Direct Connect
+**VPC Endpoints** enable private, secure connections between resources in your VPC and AWS public services, without routing traffic through the public internet. Examples of AWS public services: Amazon S3, DynamoDB, Lambda, etc.
+- Traffic between the VPC and AWS services remains within the AWS network, improving security and reducing latency.
+- There are two main types of endpoints:
+  - **Interface Endpoints**: Use Elastic Network Interfaces (ENIs) in your VPC to privately connect to AWS services. Example use case:
+    - Allows EC2 instances in a private subnet to securely access AWS Lambda or Amazon Kinesis without using a NAT gateway or internet gateway.
+  - **Gateway Endpoints**: Directly attach to your VPC for private access to Amazon S3 and Amazon DynamoDB. Example use case:
+    - Provides direct connectivity for private resources in your VPC to Amazon S3 or DynamoDB without requiring internet access.
+- AWS Endpoints offer several key advantages for resources in a VPC:
+  - Enhanced Security: Traffic does not traverse the public internet, reducing exposure to security risks.
+  - Simplified Access: Resources in private subnets can connect to AWS public services without relying on an internet gateway or NAT gateway.
+  - Lower Latency: Direct private connectivity reduces network latency compared to routing traffic through the public internet.
+  - Cost Efficiency: Avoids data transfer costs associated with public internet traffic. Reduces dependency on NAT gateways, which incur additional charges.
+  - Compliance: Helps meet regulatory and compliance requirements by ensuring data remains within the AWS network.
 
-Traffic between the VPC and AWS services remains within the AWS network, improving security and reducing latency.
-
----
-
-### Conclusion
-Understanding and configuring these components effectively allows for designing robust, secure, and efficient network architectures within AWS.
 
