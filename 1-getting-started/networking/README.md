@@ -64,6 +64,31 @@ Within a VPC, subnets are created to segment the network. They can be classified
 
 
 
+> [!IMPORTANT] 
+> ### Reserved IPs in a VPC Subnet
+> AWS reserves 5 IP addresses within each subnet in the CIDR block. These reserved IPs serve specific purposes:
+> 
+> - **First IP Address (Network Address)**:
+> Example: 192.168.1.0 in a 192.168.1.0/24 subnet.
+> Reserved as the network address and used to identify the subnet itself.
+>
+> - **Second IP Address (VPC Router)**:
+> Example: 192.168.1.1 in a 192.168.1.0/24 subnet.
+> Reserved for the VPC router, which handles communication between subnets within the VPC and outbound traffic from the VPC to external networks (e.g., the internet or > a VPN).
+>
+> - **Third IP Address (Reserved for Future Use)**:
+> Example: 192.168.1.2 in a 192.168.1.0/24 subnet.
+> Reserved by AWS for potential future use.
+>
+> - **Fourth IP Address (DNS Server)**:
+> Example: 192.168.1.3 in a 192.168.1.0/24 subnet.
+> Reserved for the Amazon-provided DNS server, which enables DNS resolution for resources in the VPC.
+> 
+> - **Last IP Address (Broadcast Address)**:
+> Example: 192.168.1.255 in a 192.168.1.0/24 subnet.
+> Reserved as the broadcast address in the subnet. Although AWS doesn’t support broadcast in a VPC, this IP is still reserved.
+
+
 
 
 ## Internet Gateway (IGW)
